@@ -84,6 +84,7 @@ body {
 }
 
 .content {
+    padding-bottom: 50px;
     position: relative;
     z-index: 1;
     display: flex;
