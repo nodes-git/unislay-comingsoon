@@ -6,32 +6,26 @@ const replayButton = document.getElementById('replayButton');
 // Function to check if device is mobile
 const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
 
-// Function to set correct video source
-const setVideoSource = () => {
-    const sources = video.getElementsByTagName('source');
-    const currentTime = video.currentTime;
-    const wasPaused = video.paused;
-    
-    // Store the current muted state
-    const wasMuted = video.muted;
-    
-    // Force reload the video to switch source
-    video.load();
-    
-    // Restore playback state
-    video.currentTime = currentTime;
-    if (!wasPaused) {
-        video.play();
+// Function to play video
+const playVideo = async () => {
+    try {
+        video.muted = true; // Must be muted for autoplay
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            await playPromise;
+            console.log('Video started playing');
+        }
+    } catch (err) {
+        console.error('Video play failed:', err);
+        // Retry play after a short delay
+        setTimeout(playVideo, 1000);
     }
-    
-    // Restore muted state
-    video.muted = wasMuted;
 };
 
-// Update video source based on screen width
-function updateVideoSource() {
+// Function to set correct video source
+const setVideoSource = () => {
     const currentTime = video.currentTime;
-    const isPaused = video.paused;
+    const wasPaused = video.paused;
     
     if (window.innerWidth < 768) {
         video.src = 'background-mobile.mp4';
@@ -39,47 +33,31 @@ function updateVideoSource() {
         video.src = 'background.mp4';
     }
     
-    video.currentTime = currentTime;
-    if (!isPaused) {
-        video.play();
-    }
-}
+    video.load();
+    playVideo(); // Try to play immediately after source change
+};
 
-// Handle window resize
-let lastIsMobile = isMobile();
+// Handle window resize with debounce
+let resizeTimeout;
 window.addEventListener('resize', () => {
-    const nowMobile = isMobile();
-    if (lastIsMobile !== nowMobile) {
-        lastIsMobile = nowMobile;
-        setVideoSource();
+    if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
     }
-    updateVideoSource();
+    resizeTimeout = setTimeout(setVideoSource, 250);
 });
-
-// Log elements to ensure they're found
-console.log('Video element:', video);
-console.log('Unmute button:', unmuteButton);
-console.log('Replay button:', replayButton);
 
 // Start video muted (browser requirement)
 video.muted = true;
-video.volume = 1.0; // Set initial volume to max
+video.volume = 1.0;
 unmuteButton.classList.add('muted');
 
-// Function to play video
-const playVideo = async () => {
-    try {
-        await video.play();
-        console.log('Video started playing');
-    } catch (err) {
-        console.log('Video play failed:', err);
-    }
-};
+// Play video when it's loaded
+video.addEventListener('loadedmetadata', playVideo);
+video.addEventListener('loadeddata', playVideo);
 
-// Play video initially
-video.addEventListener('loadedmetadata', () => {
-    playVideo();
-});
+// Ensure video plays on user interaction
+document.addEventListener('click', playVideo, { once: true });
+document.addEventListener('touchstart', playVideo, { once: true });
 
 // Show replay button when video ends
 video.addEventListener('ended', () => {
@@ -87,60 +65,34 @@ video.addEventListener('ended', () => {
 });
 
 // Handle replay button click
-replayButton.addEventListener('click', async () => {
+replayButton.addEventListener('click', () => {
     video.currentTime = 0;
     replayButton.classList.remove('show');
-    await playVideo();
+    playVideo();
 });
 
-// Ensure video plays
-const ensureVideoPlays = async () => {
-    try {
-        await video.play();
-        console.log('Video started playing');
-    } catch (err) {
-        console.log('Video autoplay failed:', err);
-    }
-};
-
-// Play video when it's loaded
-video.addEventListener('loadedmetadata', ensureVideoPlays);
-
-// Add click handler
-const handleUnmute = async (e) => {
-    console.log('Unmute button clicked');
+// Handle unmute button click
+const handleUnmute = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
-    try {
-        // Try to play the video first (needed for some browsers)
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-            await playPromise;
-        }
-        
-        // Toggle mute state
-        video.muted = !video.muted;
-        unmuteButton.classList.toggle('muted');
-        console.log('Muted state:', video.muted);
-        
-        // If we're unmuting, ensure volume is up
-        if (!video.muted) {
-            video.volume = 1.0;
-            console.log('Audio unmuted, volume:', video.volume);
-        }
-    } catch (err) {
-        console.log('Error toggling audio:', err);
-        alert('Please interact with the page first before playing audio');
+    video.muted = !video.muted;
+    unmuteButton.classList.toggle('muted');
+    
+    if (!video.muted) {
+        video.volume = 1.0;
+        playVideo(); // Try to play when unmuting
     }
 };
 
-// Add multiple event listeners to ensure click is captured
 unmuteButton.addEventListener('click', handleUnmute);
 unmuteButton.addEventListener('touchend', handleUnmute);
 
-// Initial call to set correct video source
-document.addEventListener('DOMContentLoaded', updateVideoSource);
+// Initial video source setup
+document.addEventListener('DOMContentLoaded', () => {
+    setVideoSource();
+    playVideo(); // Try to play on page load
+});
 
 // Email subscription form
 document.getElementById('subscribeForm').addEventListener('submit', async (e) => {
@@ -156,34 +108,28 @@ document.getElementById('subscribeForm').addEventListener('submit', async (e) =>
         submitButton.disabled = true;
         buttonText.textContent = 'Subscribing...';
         
-        const response = await fetch('api/subscribe', {
+        const response = await fetch('/api/subscribe', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email })
         });
         
-        let data;
-        try {
-            data = await response.json();
-        } catch (err) {
-            throw new Error('Server response was not valid JSON');
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to subscribe');
         }
         
-        if (response.ok) {
-            emailInput.value = '';
-            successMessage.classList.add('show');
-            
-            // Hide success message after 3 seconds
-            setTimeout(() => {
-                successMessage.classList.remove('show');
-            }, 3000);
-        } else {
-            throw new Error(data?.message || 'Something went wrong');
-        }
+        emailInput.value = '';
+        successMessage.classList.add('show');
+        setTimeout(() => {
+            successMessage.classList.remove('show');
+        }, 3000);
     } catch (error) {
-        alert(error.message);
+        console.error('Subscription error:', error);
+        alert(error.message || 'Failed to subscribe. Please try again.');
     } finally {
         submitButton.disabled = false;
         buttonText.textContent = 'JOIN';
