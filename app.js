@@ -1,4 +1,4 @@
-// Video audio control
+// Video controls
 const video = document.getElementById('bgVideo');
 const unmuteButton = document.getElementById('unmuteButton');
 const replayButton = document.getElementById('replayButton');
@@ -9,7 +9,6 @@ const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
 // Function to play video
 const playVideo = async () => {
     try {
-        video.muted = true; // Must be muted for autoplay
         const playPromise = video.play();
         if (playPromise !== undefined) {
             await playPromise;
@@ -24,17 +23,26 @@ const playVideo = async () => {
 
 // Function to set correct video source
 const setVideoSource = () => {
+    const wasMuted = video.muted;
     const currentTime = video.currentTime;
-    const wasPaused = video.paused;
+    const wasPlaying = !video.paused;
     
-    if (window.innerWidth < 768) {
+    if (isMobile()) {
         video.src = '/background-mobile.mp4';
     } else {
         video.src = '/background.mp4';
     }
     
     video.load();
-    playVideo(); // Try to play immediately after source change
+    video.muted = wasMuted;
+    
+    // Wait for metadata to be loaded before setting time and playing
+    video.addEventListener('loadedmetadata', () => {
+        video.currentTime = Math.min(currentTime, video.duration);
+        if (wasPlaying) {
+            playVideo();
+        }
+    }, { once: true });
 };
 
 // Handle window resize with debounce
@@ -46,9 +54,8 @@ window.addEventListener('resize', () => {
     resizeTimeout = setTimeout(setVideoSource, 250);
 });
 
-// Start video muted (browser requirement)
+// Start video muted
 video.muted = true;
-video.volume = 1.0;
 unmuteButton.classList.add('muted');
 
 // Play video when it's loaded
@@ -56,11 +63,21 @@ video.addEventListener('loadedmetadata', playVideo);
 video.addEventListener('loadeddata', playVideo);
 
 // Ensure video plays on user interaction
-document.addEventListener('click', playVideo, { once: true });
-document.addEventListener('touchstart', playVideo, { once: true });
+document.addEventListener('click', () => {
+    if (video.muted) {
+        playVideo();
+    }
+}, { once: true });
 
-// Show replay button when video ends
+document.addEventListener('touchstart', () => {
+    if (video.muted) {
+        playVideo();
+    }
+}, { once: true });
+
+// Show replay button when video ends and pause the video
 video.addEventListener('ended', () => {
+    video.pause();
     replayButton.classList.add('show');
 });
 
@@ -71,17 +88,24 @@ replayButton.addEventListener('click', () => {
     playVideo();
 });
 
+// Update mute button state when video mute state changes
+video.addEventListener('volumechange', () => {
+    unmuteButton.classList.toggle('muted', video.muted);
+    if (!video.muted) {
+        video.volume = 1.0;
+    }
+});
+
 // Handle unmute button click
 const handleUnmute = (e) => {
     e.preventDefault();
     e.stopPropagation();
     
+    const wasPaused = video.paused;
     video.muted = !video.muted;
-    unmuteButton.classList.toggle('muted');
     
-    if (!video.muted) {
-        video.volume = 1.0;
-        playVideo(); // Try to play when unmuting
+    if (!video.muted && wasPaused) {
+        playVideo();
     }
 };
 
@@ -91,7 +115,6 @@ unmuteButton.addEventListener('touchend', handleUnmute);
 // Initial video source setup
 document.addEventListener('DOMContentLoaded', () => {
     setVideoSource();
-    playVideo(); // Try to play on page load
 });
 
 // Email subscription form
