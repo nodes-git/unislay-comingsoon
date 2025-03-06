@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unislay - Coming Soon</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="shortcut icon" href="logo.png" type="image/x-icon">
 </head>
 <body>
     <div class="controls">
         <button type="button" id="replayButton" class="control-button replay-button" aria-label="Replay video">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                <path d="M17.7 7.7C16.2 6.2 14.2 5.3 12 5.3c-4.3 0-7.7 3.4-7.7 7.7s3.4 7.7 7.7 7.7c3.8 0 7-2.7 7.6-6.3" stroke="white" stroke-width="1.5" fill="none"/>
-                <path d="M13.5 3.3l4.8 4.8-4.8 4.8" stroke="white" stroke-width="1.5" fill="none"/>
+                <path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6" stroke="white" stroke-width="1.5" fill="none"/>
+                <path d="M19.5 2v4h-4" stroke="white" stroke-width="1.5" fill="none"/>
             </svg>
         </button>
         <button type="button" id="unmuteButton" class="control-button unmute-button" aria-label="Toggle sound">
@@ -32,12 +33,12 @@
     <div class="video-container">
         <video id="bgVideo" playsinline autoplay>
             <source src="/background.mp4" type="video/mp4" media="all and (min-width: 768px)">
-            <source src="/background-mobile.mp4" type="video/mp4" media="all and (max-width: 767px)">
+            <source src="/background-mobile.mp4" type="video/mp4" media="all and (max-width: 767px) and (orientation: portrait)">
             Your browser does not support the video tag.
         </video>
         <div class="video-overlay"></div>
     </div>
-    
+
     <div class="content">
         <div class="gradient-overlay"></div>
         <div class="subscribe-container">
@@ -53,6 +54,7 @@
             <div class="success-message">Thanks for subscribing!</div>
         </div>
     </div>
+
     <script src="app.js"></script>
 </body>
 </html>
