@@ -47,7 +47,7 @@ body {
 }
 
 /* Desktop styles - centered */
-@media (min-width: 768px) {
+@media (min-width: 800px) {
     #bgVideo {
         top: 50%;
         left: 50%;
@@ -59,27 +59,43 @@ body {
 }
 
 /* Mobile styles - align from top */
-@media (max-width: 767px) {
-    .video-container {
-        height: 100vh;
+@media (max-width: 800px) {
+    body {
+        position: fixed;
         width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .video-container {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
     }
 
     #bgVideo {
         position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         width: 100vw;
         height: 100vh;
         object-fit: cover;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    .controls {
+        top: auto;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .content {
+        padding-bottom: 180px;
     }
 }
 
-@media (orientation: portrait) and (max-width: 767px) {
+@media (orientation: portrait) and (max-width: 800px) {
     #bgVideo {
-        object-position: center center;
-        transform: translate(-50%, -50%) scale(1.1);
+        transform: translate(-50%, -50%) scale(1.4);
     }
 }
 
@@ -96,12 +112,6 @@ body {
     color: white;
     text-align: center;
     padding-bottom: 80px;
-}
-
-@media (max-width: 767px) {
-    .content {
-        padding-bottom: 180px;
-    }
 }
 
 .gradient-overlay {
@@ -390,47 +400,7 @@ button:active {
     opacity: 0;
 }
 
-@media (max-width: 767px) {
-    body {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    .video-container {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    #bgVideo {
-        position: fixed;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-
-    .controls {
-        top: auto;
-        bottom: 20px;
-        right: 20px;
-    }
-
-    .content {
-        padding: 40px 20px;
-    }
-}
-
-@media (orientation: portrait) and (max-width: 767px) {
-    #bgVideo {
-        transform: translate(-50%, -50%) scale(1.4);
-    }
-}
-
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .controls {
         top: 15px;
         right: 15px;
