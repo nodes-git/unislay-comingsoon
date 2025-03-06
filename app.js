@@ -3,8 +3,10 @@ const video = document.getElementById('bgVideo');
 const unmuteButton = document.getElementById('unmuteButton');
 const replayButton = document.getElementById('replayButton');
 
-// Function to check if device is mobile
-const isMobile = () => window.matchMedia('(max-width: 767px)').matches;
+// Function to check if device is mobile and in portrait
+const isMobilePortrait = () => {
+    return window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches;
+};
 
 // Function to play video
 const playVideo = async () => {
@@ -27,7 +29,7 @@ const setVideoSource = () => {
     const currentTime = video.currentTime;
     const wasPlaying = !video.paused;
     
-    if (isMobile()) {
+    if (isMobilePortrait()) {
         video.src = '/background-mobile.mp4';
     } else {
         video.src = '/background.mp4';
@@ -45,14 +47,17 @@ const setVideoSource = () => {
     }, { once: true });
 };
 
-// Handle window resize with debounce
+// Handle window resize and orientation change
 let resizeTimeout;
-window.addEventListener('resize', () => {
+const handleResize = () => {
     if (resizeTimeout) {
         clearTimeout(resizeTimeout);
     }
     resizeTimeout = setTimeout(setVideoSource, 250);
-});
+};
+
+window.addEventListener('resize', handleResize);
+window.addEventListener('orientationchange', handleResize);
 
 // Start video muted
 video.muted = true;
