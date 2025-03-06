@@ -84,7 +84,7 @@ body {
 }
 
 .content {
-    padding-bottom: 50px;
+    
     position: relative;
     z-index: 1;
     display: flex;
@@ -96,6 +96,7 @@ body {
     box-sizing: border-box;
     color: white;
     text-align: center;
+    padding-bottom: 50px;
 }
 
 .gradient-overlay {
