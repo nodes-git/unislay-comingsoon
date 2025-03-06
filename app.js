@@ -28,9 +28,9 @@ const setVideoSource = () => {
     const wasPaused = video.paused;
     
     if (window.innerWidth < 768) {
-        video.src = 'background-mobile.mp4';
+        video.src = '/background-mobile.mp4';
     } else {
-        video.src = 'background.mp4';
+        video.src = '/background.mp4';
     }
     
     video.load();
