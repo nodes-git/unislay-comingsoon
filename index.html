@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="shortcut icon" href="logo.png" type="image/x-icon">
+</head>
+<body>
+    <div id="controls" class="controls">
+        <button type="button" id="replayButton" class="control-button replay-button" aria-label="Replay video">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+            </svg>
+        </button>
+        <button type="button" id="unmuteButton" class="control-button unmute-button" aria-label="Toggle sound">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+        </button>
+    </div>
+    
+    <div class="video-container">
+        <video playsinline preload="auto" id="bgVideo">
+            <source src="background.mp4" type="video/mp4" media="(min-width: 768px)">
+            <source src="background-mobile.mp4" type="video/mp4" media="(max-width: 767px)">
+        </video>
+    </div>
+    
+    <div class="content">
+        <div class="gradient-overlay"></div>
+        <div class="subscribe-container">
+            <form id="subscribeForm">
+                <div class="brutalist-container">
+                    <input type="email" id="email" class="brutalist-input smooth-type" placeholder="ENTER YOUR EMAIL" required>
+                    <label class="brutalist-label">COMING SOON</label>
+                </div>
+                <button type="submit">
+                    <span class="button-text">JOIN</span>
+                </button>
+            </form>
+            <div class="success-message">Thanks for subscribing!</div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
