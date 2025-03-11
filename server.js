@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import nodemailer from 'nodemailer';
 import cors from 'cors';
+import fs from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -66,19 +67,35 @@ app.post('/api/subscribe', async (req, res) => {
         const subscriber = new Subscriber({ email });
         await subscriber.save();
 
+        // Read email template
+        const emailTemplatePath = path.join(__dirname, 'email.html');
+        console.log('Reading email template from:', emailTemplatePath);
+        
+        let emailTemplate;
+        try {
+            emailTemplate = await fs.readFile(emailTemplatePath, 'utf8');
+            console.log('Email template loaded successfully');
+        } catch (err) {
+            console.error('Error reading email template:', err);
+            throw new Error('Failed to read email template');
+        }
+
+        // Customize email template
+        const subscriberName = email.split('@')[0]
+            .split(/[._-]/)
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ');
+            
+        const customizedTemplate = emailTemplate
+            .replace('[Subscriber\'s Name]', subscriberName)
+            .replace(/logo\.png/g, 'https://i.ibb.co/ksXJzkmY/logo.png');
+
         // Send welcome email
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
-            subject: 'Welcome to Unislay!',
-            html: `
-                <h2>Welcome to Unislay!</h2>
-                <p>Thank you for subscribing to our newsletter. We're excited to have you on board!</p>
-                <p>Stay tuned for updates on our launch and exciting news.</p>
-                <br>
-                <p>Best regards,</p>
-                <p>The Unislay Team</p>
-            `
+            subject: 'Welcome to Unislay! Your College Journey Begins',
+            html: customizedTemplate
         });
 
         res.status(201).json({ message: 'Subscribed successfully!' });
@@ -87,7 +104,7 @@ app.post('/api/subscribe', async (req, res) => {
         if (error.code === 11000) {
             res.status(400).json({ message: 'Email already subscribed' });
         } else {
-            res.status(500).json({ message: 'Server error' });
+            res.status(500).json({ message: 'Server error', details: error.message });
         }
     }
 });
